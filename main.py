@@ -74,8 +74,13 @@ class BilinearFilter(object):
         bounds[::2] = np.where(centers - filterscale < 0, 0, centers - filterscale)
         bounds[1::2] = np.where(centers + filterscale > inSize, inSize, centers + filterscale) - bounds[::2]
         xmins = bounds[::2] - centers + 1
-
-        points = np.array([np.arange(row) + xmins[i] for i, row in enumerate(bounds[1::2])]) / filterscale
+        #解决np.array成员长度不一致导致的转换失败
+        temp_list = [np.arange(row) + xmins[i] for i, row in enumerate(bounds[1::2])]   
+        narry = np.zeros([len(temp_list),len(max(temp_list,key = lambda x: len(x)))])
+        for i,j in enumerate(temp_list):
+            narry[i][0:len(j)] = j 
+        points = narry/filterscale
+        #points = np.array([np.arange(row) + xmins[i] for i, row in enumerate(bounds[1::2])]) / filterscale
         for xx in range(0, outSize):
             point = points[xx]
             bilinear = np.where(point < 1.0, 1.0 - abs(point), 0.0)
